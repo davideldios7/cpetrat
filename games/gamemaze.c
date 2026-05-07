@@ -37,7 +37,7 @@ static void stop() {
     clear();
     refresh();
     endwin();
-    if(won){addstat(&rat.hunger); addstat(&rat.fun); printf("the rat feels less hungry...\n\n");}
+    if(won){addstat(&rat.fun); printf("the rat feels less hungry...\n\n");}
     won = 0;
     found = 0;
     running = 0; 
@@ -49,14 +49,16 @@ static char **grid; //big ahh grid
 void lerw() {
     int W = (width / 3);
     int H = (height / 2);
- 
+
+    int cw = (W - 1) / 3; //make them 2x2 instead of 1x1
+    int ch = (H - 1) / 2;
+    if (cw < 1 || ch < 1) return;
+
+    W = 3 * cw + 1; //trim w to exactly fit
+    H = 3 * ch + 1; 
     for (int y = 0; y < H; y++)
         for (int x = 0; x < W; x++)
-            grid[y][x] = '#';
- 
-    int cw = (W - 1) / 3; //make them 2x2 instead of 1x1
-    int ch = (H - 1) / 3;
-    if (cw < 1 || ch < 1) return;
+            grid[y][x] = '#';;
  
     int total = cw * ch;
     char *vis = calloc(total, 1); //visited
@@ -145,6 +147,52 @@ void lerw() {
 //i have no fucking idea what i did here. it was revealed to me in a dream unironically 
 //i have a slight idea of what i have done here
 
+static int iswall(int y, int x) {
+    return grid[y][x] == '#';
+}
+
+static int ischeese(int y, int x){
+    return grid[y][x] == 'O';
+}
+
+void spawncheeses() {
+    int W = (width / 3);
+    int H = (height / 2);
+    int cw = (W - 1) / 3;
+    int ch = (H - 1) / 2;
+    W = 3 * cw + 1;
+    H = 3 * ch + 1;
+
+    int placed = 0;
+    while (placed < 5) {
+        int x = rand() % W;
+        int y = rand() % H;
+        if (grid[y][x] == ' ') {
+            grid[y][x] = 'O';
+            placed++;
+        }
+    }
+}
+
+void eatcheese(cursor *curs) {
+    if (ischeese(curs->posy, curs->posx)) {
+        grid[curs->posy][curs->posx] = ' ';
+        found++;
+        addstat(&rat.hunger);
+    }
+}
+
+void checkexit(cursor *curs) {
+    int w = ((width/3) - 1) / 3;
+    int h = ((height/2) - 1) / 2;
+    int W = 3 * w + 1;
+    int H = 3 * h + 1;
+    if (curs->posy == H - 1 && (curs->posx == W - 3 || curs->posx == W - 2)) {
+        won = 1;
+        stop();
+    }
+}
+
 void gamemaze(){ 
 
     srand(time(NULL));
@@ -160,6 +208,7 @@ void gamemaze(){
     grid[y] = malloc(W * sizeof(char));
 
     lerw();
+    spawncheeses();
 
     found = 0; 
 
@@ -178,23 +227,43 @@ void gamemaze(){
         int ch = getch();
         switch (ch) {
             case 'q': case 'Q': stop(); break;
+            case 'r': case 'R': stop(); gamemaze(); break;
             case 'a': case 'A': case KEY_LEFT:
-                curs.posx -= 1; break;
+                if (!iswall(curs.posy, curs.posx - 1)) curs.posx -= 1; break;
             case 'd': case 'D': case KEY_RIGHT:
-                curs.posx += 1; break;
+                if (!iswall(curs.posy, curs.posx + 1))curs.posx += 1; break;
             case 'w': case 'W': case KEY_UP:
-                curs.posy -= 1; break; 
+                if (!iswall(curs.posy - 1, curs.posx))curs.posy -= 1; break; 
             case 's': case 'S': case KEY_DOWN:
-                curs.posy += 1; break; 
+                if (!iswall(curs.posy + 1, curs.posx))curs.posy += 1; break; 
         }
         
+        eatcheese(&curs);
+        checkexit(&curs);
+
         if (!running) break;
         clear();
 
+        mvprintw(0, width/3+1, "move around the maze and find food!"); 
+        mvprintw(1, width/3+1, "you've collected %d/5 cheeses", found); 
+        mvprintw(2, width/3+1, "(only if you find food your rat will be less hungry)"); 
+        mvprintw(height/1.5-2, width/3+1, "btw sometimes the maze is impossible just press R");
+        mvprintw(height/1.5-1, width/3+1, "if that's the case");
 
         for (int y = 0; y < H; y++)
-        for (int x = 0; x < W; x++)
+        for (int x = 0; x < W; x++){
         if (grid[y][x] == '#') mvaddch(y, x, '#');
+        else if (grid[y][x] == 'O') {
+            int dist = abs(y - curs.posy) + abs(x - curs.posx);
+            if (dist <= 5) mvaddch(y, x, 'O');
+            }
+        }
+
+        int wmsg = ((width/3) - 1) / 3;
+        int hmsg = ((height/2) - 1) / 2;
+        int msgw = 3 * wmsg + 1;
+        int msgh = 3 * hmsg + 1;        
+        mvprintw(msgh, msgw-2, "^ leave through here");
 
         mvaddstr(curs.posy, curs.posx, curs.face[0]);
 
