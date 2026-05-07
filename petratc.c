@@ -76,11 +76,11 @@ void setstat(){
     int timenow = time(NULL);
     int newage = timenow - rat.age;  
 
-    rat.hunger = decay(rat.hunger, newage, 0.005f);
-    rat.love   = decay(rat.love, newage, 0.002f);
-    rat.fun    = decay(rat.fun, newage, 0.006f);
-    rat.clean  = decay(rat.clean, newage, 0.0002f);
-    rat.health = decay(rat.health, newage, 0.00002f);
+    rat.hunger = decay(rat.hunger, newage, 0.0008f); //should be like 30 hours now
+    rat.love   = decay(rat.love, newage, 0.00035f); //80 hours
+    rat.fun    = decay(rat.fun, newage, 0.0006f); //short like 25
+    rat.clean  = decay(rat.clean, newage, 0.0009f); //around 35  or 40 hours
+    rat.health = decay(rat.health, newage, 0.00008f); //like 2 weeks
     
 
     rat.age = timenow; //thinking about this makes my cortisol spike so i'll just ignore it even more
