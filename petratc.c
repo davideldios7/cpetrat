@@ -54,11 +54,11 @@ void load(void) {
 
     FILE *f = fopen(path, "r");
     if (!f) {
-        rat.hunger = 100.0f;
-        rat.love   = 100.0f;
-        rat.fun    = 100.0f;
-        rat.clean  = 100.0f;
-        rat.health = 100.0f;
+        rat.hunger = 80.0f;
+        rat.love   = 80.0f;
+        rat.fun    = 80.0f;
+        rat.clean  = 80.0f;
+        rat.health = 80.0f;
         rat.age    = time(NULL);
         return;
     }
