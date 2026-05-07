@@ -54,11 +54,11 @@ void load(void) {
 
     FILE *f = fopen(path, "r");
     if (!f) {
-        rat.hunger = 100.0f;
-        rat.love   = 100.0f;
-        rat.fun    = 100.0f;
-        rat.clean  = 100.0f;
-        rat.health = 100.0f;
+        rat.hunger = 80.0f;
+        rat.love   = 80.0f;
+        rat.fun    = 80.0f;
+        rat.clean  = 80.0f;
+        rat.health = 80.0f;
         rat.age    = time(NULL);
         return;
     }
@@ -117,8 +117,8 @@ int truing = 1;
     switch(choice){
 
         case 1: gameguess(); break;
-        case 2: gamemaze(); break; 
-        case 4: gamecatch(); break; 
+        case 2: gamemaze(); printf("the maze is really dark squeak...\n\n"); break; 
+        case 4: gamecatch(); printf("your rat feels cleaner!\n\n"); break; 
         case 9: printrat(); break;
         case 0: truing = 0; break; 
         }
