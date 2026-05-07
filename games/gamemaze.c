@@ -193,6 +193,25 @@ void checkexit(cursor *curs) {
     }
 }
 
+static void properrestart(cursor *curs, int *W, int *H) {
+    for (int y = 0; y < *H; y++) free(grid[y]);
+    free(grid);
+
+    *W = getmaxx(stdscr);
+    *H = getmaxy(stdscr);
+
+    grid = malloc(*H * sizeof(char *));
+    for (int y = 0; y < *H; y++)
+        grid[y] = malloc(*W * sizeof(char));
+
+    lerw();
+    spawncheeses();
+
+    curs->posy = 1;
+    curs->posx = 1;
+    found = 0;
+}
+
 void gamemaze(){ 
 
     srand(time(NULL));
@@ -227,7 +246,7 @@ void gamemaze(){
         int ch = getch();
         switch (ch) {
             case 'q': case 'Q': stop(); break;
-            case 'r': case 'R': stop(); gamemaze(); break;
+            case 'r': case 'R': properrestart(&curs, &W, &H); break;
             case 'a': case 'A': case KEY_LEFT:
                 if (!iswall(curs.posy, curs.posx - 1)) curs.posx -= 1; break;
             case 'd': case 'D': case KEY_RIGHT:
